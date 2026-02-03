@@ -2,6 +2,7 @@ package com.scheduleapp.controller;
 
 import com.scheduleapp.dto.CreateScheduleRequest;
 import com.scheduleapp.dto.CreateScheduleResponse;
+import com.scheduleapp.dto.GetScheduleRequest;
 import com.scheduleapp.dto.GetScheduleResponse;
 import com.scheduleapp.service.ScheduleService;
 import lombok.RequiredArgsConstructor;
@@ -28,5 +29,12 @@ public class ScheduleController {
     public ResponseEntity<List<GetScheduleResponse>> getAll(@RequestParam (required = false) String name) {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(scheduleService.getAll(name));
+    }
+
+    // Lv.2 일정 선택 조회: GetMapping
+    @GetMapping("/schedules/{scheduleId}")
+    public ResponseEntity<GetScheduleResponse> getOne(@PathVariable Long scheduleId) {
+        return ResponseEntity.status(HttpStatus.OK)
+                .body(scheduleService.getOne(scheduleId));
     }
 }
