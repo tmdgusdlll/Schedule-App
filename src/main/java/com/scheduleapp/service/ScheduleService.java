@@ -24,7 +24,8 @@ public class ScheduleService {
         Schedule schedule = new Schedule(
                 request.getTitle(),
                 request.getContents(),
-                request.getName()
+                request.getName(),
+                request.getPassword()
         );
         // 스케줄 데이터를 Entity 그대로 밖으로 보내면 (응답하면) Entity 내의 민감한 정보가 위험할 수 있음
         // -> dto를 사용해 안전하게 반환 여기서 dto 응답 클래스는 CreateScheduleResponse
@@ -48,10 +49,10 @@ public class ScheduleService {
         // 만약 작성자명이 null이 아니고 빈 값이 아니라면 findAllByNameOrderByModifiedAtDesc() 실행하여 allSchedules 변수에 담기.
         if (name != null && !name.isEmpty()) {
             allSchedules = scheduleRepository.findAllByNameOrderByModifiedAtDesc(name); // 해당 메서드는 ScheduleRepository에서 정의함
+        } else {
+            // null이면 그냥 수정일 기준 내림차순 조회
+            allSchedules = scheduleRepository.findAllByOrderByModifiedAtDesc(); // 해당 메서드도 ScheduleRepository에서 정의함
         }
-        // null이면 그냥 수정일 기준 내림차순 조회
-        allSchedules = scheduleRepository.findAllOrderByModifiedAtDesc(); // 해당 메서드도 ScheduleRepository에서 정의함
-
         // 전체 조회 결과 또한 dto로 반환해야 함
         List<GetScheduleResponse> dtos = new ArrayList<>();
 
@@ -97,7 +98,12 @@ public class ScheduleService {
         // 레포지토리에서 id에 맞게 찾아주고, 그 해당 일정이 없다면 예외를 던져라.
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
                 () -> new IllegalStateException("존재하지 않는 일정입니다.")
-        ); // 만약 일정 비번이랑 요청 비번이랑 같지 않다면 예외
+        );
+        // 로그 찍어보기 (터미널에서 확인용)
+        System.out.println("DB에서 가져온 비번: " + schedule.getPassword());
+        System.out.println("사용자가 입력한 비번: " + request.getPassword());
+
+        // 만약 일정 비번이랑 요청 비번이랑 같지 않다면 예외
         if (!schedule.getPassword().equals(request.getPassword())) {
             throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
         } else { // 같아면 제목과 이름만 변경할 수 있게
@@ -115,7 +121,7 @@ public class ScheduleService {
 
     // Lv.4 일정 삭제
     @Transactional
-    public void delete(Long scheduleId, DeleteScheduleRequest request) {
+    public void deleteSchedule(Long scheduleId, DeleteScheduleRequest request) {
         // 삭제할 일정을 id를 기준으로 찾아서 schedule 변수에 담겠다
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
                 // 해당 id에 일정이 없다면 예외

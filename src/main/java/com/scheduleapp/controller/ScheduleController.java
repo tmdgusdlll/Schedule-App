@@ -46,7 +46,8 @@ public class ScheduleController {
 
     // Lv.4 일정 삭제: DeleteMapping
     @DeleteMapping("/schedules/{scheduleId}")
-    public ResponseEntity<Void> delete(@PathVariable Long scheduleId, DeleteScheduleRequest request) {
+    public ResponseEntity<Void> delete(@PathVariable Long scheduleId, @RequestBody DeleteScheduleRequest request) {
+        scheduleService.deleteSchedule(scheduleId, request);
         return ResponseEntity.status(HttpStatus.NO_CONTENT).build();
     }
 
