@@ -20,11 +20,14 @@ public class ScheduleService {
     // Lv.1 일정 생성
     @Transactional
     public CreateScheduleResponse save(CreateScheduleRequest request) {
+        // 스케줄 데이터들을 받을 schedule 변수 생성 후 담기
         Schedule schedule = new Schedule(
                 request.getTitle(),
                 request.getContents(),
                 request.getName()
         );
+        // 스케줄 데이터를 Entity 그대로 밖으로 보내면 (응답하면) Entity 내의 민감한 정보가 위험할 수 있음
+        // -> dto를 사용해 안전하게 반환 여기서 dto 응답 클래스는 CreateScheduleResponse
         Schedule savedSchedule = scheduleRepository.save(schedule);
         return new CreateScheduleResponse(
                 savedSchedule.getId(),
@@ -37,20 +40,24 @@ public class ScheduleService {
     }
 
     // Lv.2 일정 전체 조회
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true) // 조회만 할 경우엔 데이터의 수정이 없기 때문에 읽기전용으로 설정해 메모리를 아끼자(효율성)
     public List<GetScheduleResponse> getAll(String name) {
-        List<Schedule> allSchedules;
+        List<Schedule> allSchedules; // 조회될 전체 일정을 담을 리스트
 
         // Lv.2 작성자명 기준으로 일정 전체 조회(null이 아니면 이름기준 전체 조회 + 수정일 기준으로 내림차순)
+        // 만약 작성자명이 null이 아니고 빈 값이 아니라면 findAllByNameOrderByModifiedAtDesc() 실행하여 allSchedules 변수에 담기.
         if (name != null && !name.isEmpty()) {
-            allSchedules = scheduleRepository.findAllByNameOrderByModifiedAtDesc(name);
-        } else {
-            // null이면 그냥 수정일 기준 내림차순 조회
-           allSchedules = scheduleRepository.findAllOrderByModifiedAtDesc();
+            allSchedules = scheduleRepository.findAllByNameOrderByModifiedAtDesc(name); // 해당 메서드는 ScheduleRepository에서 정의함
         }
+        // null이면 그냥 수정일 기준 내림차순 조회
+        allSchedules = scheduleRepository.findAllOrderByModifiedAtDesc(); // 해당 메서드도 ScheduleRepository에서 정의함
+
+        // 전체 조회 결과 또한 dto로 반환해야 함
         List<GetScheduleResponse> dtos = new ArrayList<>();
 
+        // allSchedules에 담김 요소들을 돌면서 schedule을 내보낸다.
         for (Schedule schedule : allSchedules) {
+            // 그 schedule들을 반환타입이 GetShceduleResponse 타입인 dto라는 변수에 담아라.
             GetScheduleResponse dto = new GetScheduleResponse(
                     schedule.getId(),
                     schedule.getTitle(),
@@ -59,17 +66,20 @@ public class ScheduleService {
                     schedule.getCreatedAt(),
                     schedule.getModifiedAt()
             );
+            // 그 dto를 dtos 리스트에 추가해라.
             dtos.add(dto);
         }
         return dtos;
     }
 
     // Lv.2 일정 선택 조회
-    @Transactional(readOnly = true)
+    @Transactional(readOnly = true) // 마찬가지로 조회이므로 읽기전용 설정
+    // 일정 id를 입력받아 조회하겠다.
     public GetScheduleResponse getOne(Long scheduleId) {
+        // 입력받은 id의 일정을 찾아서 schedule 변수에 담고, 없다면 예외를 던저라
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
                 () -> new IllegalStateException("존재하지 않는 일정입니다.")
-        );
+        ); // 담긴 schedule을 dto에 감싸서 반환하기
         return new GetScheduleResponse(
                 schedule.getId(),
                 schedule.getTitle(),
@@ -106,13 +116,6 @@ public class ScheduleService {
     // Lv.4 일정 삭제
     @Transactional
     public void delete(Long scheduleId, DeleteScheduleRequest request) {
-//        boolean existence = scheduleRepository.existsById(scheduleId);
-//
-//        if (!existence) {
-//            throw new IllegalStateException("존재하지 않는 일정입니다.");
-//        }
-//        scheduleRepository.deleteById(scheduleId);
-
         // 삭제할 일정을 id를 기준으로 찾아서 schedule 변수에 담겠다
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
                 // 해당 id에 일정이 없다면 예외
