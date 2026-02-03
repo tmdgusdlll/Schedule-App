@@ -1,11 +1,10 @@
 package com.scheduleapp.service;
 
-import com.scheduleapp.dto.CreateScheduleRequest;
-import com.scheduleapp.dto.CreateScheduleResponse;
-import com.scheduleapp.dto.GetScheduleResponse;
+import com.scheduleapp.dto.*;
 import com.scheduleapp.entity.Schedule;
 import com.scheduleapp.repository.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -72,6 +71,29 @@ public class ScheduleService {
                 () -> new IllegalStateException("존재하지 않는 일정입니다.")
         );
         return new GetScheduleResponse(
+                schedule.getId(),
+                schedule.getTitle(),
+                schedule.getContents(),
+                schedule.getName(),
+                schedule.getCreatedAt(),
+                schedule.getModifiedAt()
+        );
+    }
+
+    // Lv.3 일정 수정 (선택수정)
+    @Transactional
+    // 고유 id 와 수정요청에 맞게 업데이트 할것이다.
+    public UpdateScheduleResponse updateSchedule(Long scheduleId, UpdateScheduleRequest request) {
+        // 레포지토리에서 id에 맞게 찾아주고, 그 해당 일정이 없다면 예외를 던져라.
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
+                () -> new IllegalStateException("존재하지 않는 일정입니다.")
+        ); // 만약 일정 비번이랑 요청 비번이랑 같지 않다면 예외
+        if (!schedule.getPassword().equals(request.getPassword())) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        } else { // 같아면 제목과 이름만 변경할 수 있게
+            schedule.update(request.getTitle(), request.getName());
+        } // 업데이트 된 모든 것을 응답 dto에 담아서 반환
+        return new UpdateScheduleResponse(
                 schedule.getId(),
                 schedule.getTitle(),
                 schedule.getContents(),
