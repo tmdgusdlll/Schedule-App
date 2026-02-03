@@ -102,4 +102,25 @@ public class ScheduleService {
                 schedule.getModifiedAt()
         );
     }
+
+    // Lv.4 일정 삭제
+    @Transactional
+    public void delete(Long scheduleId, DeleteScheduleRequest request) {
+//        boolean existence = scheduleRepository.existsById(scheduleId);
+//
+//        if (!existence) {
+//            throw new IllegalStateException("존재하지 않는 일정입니다.");
+//        }
+//        scheduleRepository.deleteById(scheduleId);
+
+        // 삭제할 일정을 id를 기준으로 찾아서 schedule 변수에 담겠다
+        Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
+                // 해당 id에 일정이 없다면 예외
+                () -> new IllegalStateException("존재하지 않는 일정입니다.")
+        ); // 만약 일정 비번이랑 요청 비번이 다르다면 예외
+        if (!schedule.getPassword().equals(request.getPassword())) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        } // 일치하다면 schedule에 담겨있던 일정 삭제
+        scheduleRepository.delete(schedule);
+    }
 }
