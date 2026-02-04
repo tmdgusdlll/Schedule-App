@@ -275,3 +275,7 @@ Content-Type: application/json
 }  
 \]  
 }
+
+# ERD
+<img width="708" height="1054" alt="image" src="https://github.com/user-attachments/assets/8b6d0028-fb8d-40ea-acdb-21571343c1e5" />
+
