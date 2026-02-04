@@ -1,9 +1,9 @@
-package com.scheduleapp.dto;
+package com.scheduleapp.dto.schedule;
 
 import lombok.Getter;
 
 @Getter
-public class GetScheduleRequest {
+public class CreateScheduleRequest {
     private String title;
     private String contents;
     private String name;

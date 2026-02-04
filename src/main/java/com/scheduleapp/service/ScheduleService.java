@@ -85,23 +85,27 @@ public class ScheduleService {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
                 () -> new IllegalStateException("존재하지 않는 일정입니다.")
         );
+        // 일정 id를 기준으로 댓글들을 찾아서 List 타입인 comment 에 담겠다.
+        List<Comment> comment = commentRepository.findByScheduleId(scheduleId);
 
-        List<Comment> comments = commentRepository.findByScheduleId(scheduleId);
-        List<GetCommentResponse> dtos = new ArrayList<>();
+        // 최종 GetCommentResponse 타입인 댓글들을 담을 comments 리스트 생성.
+        List<GetCommentResponse> comments = new ArrayList<>();
 
         // dto로 감싸기
-        for (Comment comment : comments) {
+        // comment를 순회하면서 각각 내용들을 dto 변수에 담아 GetCommentResponse 타입으로 반환하겠다.
+        for (Comment c : comment) {
             GetCommentResponse dto = new GetCommentResponse(
-                    comment.getId(),
-                    comment.getContents(),
-                    comment.getName(),
-                    comment.getCreatedAt(),
-                    comment.getModifiedAt()
+                    c.getId(),
+                    c.getContents(),
+                    c.getName(),
+                    c.getCreatedAt(),
+                    c.getModifiedAt()
             );
-            dtos.add(dto);
+            // 최종 List<GetCommentResponse> 타입의 comments 리스트에 dto를 추가해라.
+            comments.add(dto);
         }
 
-        // 담긴 schedule을 dto에 감싸서 반환하기
+        // 담긴 schedule + 댓글을 dto에 감싸서 반환하기
         return new GetScheduleDetailResponse(
                 schedule.getId(),
                 schedule.getTitle(),
@@ -109,7 +113,7 @@ public class ScheduleService {
                 schedule.getName(),
                 schedule.getCreatedAt(),
                 schedule.getModifiedAt(),
-                dtos
+                comments
         );
     }
 
