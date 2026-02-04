@@ -1,6 +1,6 @@
 package com.scheduleapp.controller;
 
-import com.scheduleapp.dto.*;
+import com.scheduleapp.dto.schedule.*;
 import com.scheduleapp.service.ScheduleService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -30,7 +30,7 @@ public class ScheduleController {
 
     // Lv.2 일정 선택 조회: GetMapping
     @GetMapping("/schedules/{scheduleId}")
-    public ResponseEntity<GetScheduleResponse> getOne(@PathVariable Long scheduleId) {
+    public ResponseEntity<GetScheduleDetailResponse> getOne(@PathVariable Long scheduleId) {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(scheduleService.getOne(scheduleId));
     }

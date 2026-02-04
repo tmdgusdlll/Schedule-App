@@ -1,20 +1,24 @@
 package com.scheduleapp.service;
 
-import com.scheduleapp.dto.*;
+import com.scheduleapp.dto.comment.GetCommentResponse;
+import com.scheduleapp.dto.schedule.*;
+import com.scheduleapp.entity.Comment;
 import com.scheduleapp.entity.Schedule;
+import com.scheduleapp.repository.CommentRepository;
 import com.scheduleapp.repository.ScheduleRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
 public class ScheduleService {
     private final ScheduleRepository scheduleRepository;
+    private final CommentRepository commentRepository;
 
 
     // Lv.1 일정 생성
@@ -76,18 +80,36 @@ public class ScheduleService {
     // Lv.2 일정 선택 조회
     @Transactional(readOnly = true) // 마찬가지로 조회이므로 읽기전용 설정
     // 일정 id를 입력받아 조회하겠다.
-    public GetScheduleResponse getOne(Long scheduleId) {
+    public GetScheduleDetailResponse getOne(Long scheduleId) {
         // 입력받은 id의 일정을 찾아서 schedule 변수에 담고, 없다면 예외를 던저라
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
                 () -> new IllegalStateException("존재하지 않는 일정입니다.")
-        ); // 담긴 schedule을 dto에 감싸서 반환하기
-        return new GetScheduleResponse(
+        );
+
+        List<Comment> comments = commentRepository.findByScheduleId(scheduleId);
+        List<GetCommentResponse> dtos = new ArrayList<>();
+
+        // dto로 감싸기
+        for (Comment comment : comments) {
+            GetCommentResponse dto = new GetCommentResponse(
+                    comment.getId(),
+                    comment.getContents(),
+                    comment.getName(),
+                    comment.getCreatedAt(),
+                    comment.getModifiedAt()
+            );
+            dtos.add(dto);
+        }
+
+        // 담긴 schedule을 dto에 감싸서 반환하기
+        return new GetScheduleDetailResponse(
                 schedule.getId(),
                 schedule.getTitle(),
                 schedule.getContents(),
                 schedule.getName(),
                 schedule.getCreatedAt(),
-                schedule.getModifiedAt()
+                schedule.getModifiedAt(),
+                dtos
         );
     }
 
@@ -99,9 +121,9 @@ public class ScheduleService {
         Schedule schedule = scheduleRepository.findById(scheduleId).orElseThrow(
                 () -> new IllegalStateException("존재하지 않는 일정입니다.")
         );
-        // 로그 찍어보기 (터미널에서 확인용)
-        System.out.println("DB에서 가져온 비번: " + schedule.getPassword());
-        System.out.println("사용자가 입력한 비번: " + request.getPassword());
+//        // 로그 찍어보기 (터미널에서 확인용)
+//        System.out.println("DB에서 가져온 비번: " + schedule.getPassword());
+//        System.out.println("사용자가 입력한 비번: " + request.getPassword());
 
         // 만약 일정 비번이랑 요청 비번이랑 같지 않다면 예외
         if (!schedule.getPassword().equals(request.getPassword())) {
