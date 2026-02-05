@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
+// 댓글 Entity
 @Getter
 @Entity
 @Table(name = "comments")
@@ -19,11 +20,8 @@ public class Comment extends BaseEntity{
     private String name;
     @Column(nullable = false) // Lv.7 비밀번호 필수값 처리
     private String password;
-//    // Schedule 클래스와 연결관계를 갖기위한 추가적인 어노테이션과 필드, 생성자까지
-//    @ManyToOne(fetch = FetchType.LAZY)
-//    @JoinColumn(name = "schedule_id")
-    // JPA 연관관계 사용하지 않기
-    private Long scheduleId;
+    // Foreign Key
+    private Long scheduleId; // Lv.5 한 일정에 여러 댓글을 작성하는 것이므로 Comment에 scheduleId 필드 주입하기
 
 
     public Comment(String contents, String name, String password, Long scheduleId) {

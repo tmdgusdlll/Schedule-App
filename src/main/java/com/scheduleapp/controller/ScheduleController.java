@@ -23,6 +23,7 @@ public class ScheduleController {
 
     // Lv.2 일정 전체 조회: GetMapping
     @GetMapping("/schedules")
+    // @RequestParam(required = false) -> name(작성자명)을 조회조건으로 받는데 필수는 아님. 포함될 수도 있고 안 될 수도 있고.
     public ResponseEntity<List<GetScheduleResponse>> getAll(@RequestParam(required = false) String name) {
         return ResponseEntity.status(HttpStatus.OK)
                 .body(scheduleService.getAll(name));

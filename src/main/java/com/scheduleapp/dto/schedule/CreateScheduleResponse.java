@@ -1,5 +1,6 @@
 package com.scheduleapp.dto.schedule;
 
+import com.scheduleapp.entity.Schedule;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
@@ -22,4 +23,14 @@ public class CreateScheduleResponse {
         this.modifiedAt = modifiedAt;
         // 응답에 password는 제외하기.
     }
+
+//    public CreateScheduleResponse(Schedule schedule) {
+//        this.id = schedule.getId();
+//        this.title = schedule.getTitle();
+//        this.contents = schedule.getContents();
+//        this.name = schedule.getName();
+//        this.createdAt = schedule.getCreatedAt();
+//        this.modifiedAt = schedule.getModifiedAt();
+//        // password는 제외.
+//    }
 }
